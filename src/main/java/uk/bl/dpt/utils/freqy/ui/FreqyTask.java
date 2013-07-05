@@ -52,6 +52,8 @@ public class FreqyTask extends Task<Object> {
 	protected Object call() throws Exception {
 		Tika tika = new Tika();
 		fileList = new ArrayList<File>();
+		
+		StringBuilder skipped = new StringBuilder();
 
 		try {
 			File f = new File(inPath);
@@ -81,12 +83,12 @@ public class FreqyTask extends Task<Object> {
 					String text = tika.parseToString(current);
 					FileUtils.writeStringToFile(allText, text, true);
 				} catch (IOException e) {
-					System.out.println("Skipping file: "
-							+ current.getAbsolutePath() + " - IO error");
+					skipped.append("<li>Skipping file: "
+							+ current.getAbsolutePath() + " - IO error</li>");
 				} catch (TikaException e) {
-					System.out.println("Skipping file: "
+					skipped.append("<li>Skipping file: "
 							+ current.getAbsolutePath()
-							+ " - Tika extraction error");
+							+ " - Tika extraction error</li>");
 				}
 				
 				updateProgress(i, fileList.size());
@@ -109,6 +111,12 @@ public class FreqyTask extends Task<Object> {
 						+ "</h2>", true);
 				FileUtils.writeStringToFile(o, "<hr />", true);
 				FileUtils.writeStringToFile(o, cloud.toHTML(), true);
+				FileUtils.writeStringToFile(o, "<!--h2>Skipped Files</h2><p>The following files are not included in this summary due to errors: </p>", true );
+				FileUtils.writeStringToFile(o, "<ul>" + skipped.toString() + "</ul-->", true);
+				FileUtils.writeStringToFile(o, "<hr/>", true);
+				FileUtils.writeStringToFile(o, "<small><a href=\"https://github.com/petecliff/freqy\">made by freqy</a></small><br />", true);	
+				FileUtils.writeStringToFile(o, "<small>please handle your digital data with care. freqy is for guidance only</small>", true);				
+
 			}
 
 		} finally {
